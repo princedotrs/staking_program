@@ -1,61 +1,65 @@
-# NFT Staking Project
+# staking_program: stake SOL, SPL tokens and NFTs on Solana
 
 ## Description
-This project implements an staking mechanism using the Anchor framework on Solana. Users can stake their Native Sol,NFTs and SPL Token to earn rewards, and the system manages the staking process, including initialization, staking, unstaking, and claiming rewards.
+This project implements a staking program with the Anchor framework on Solana. Users can stake native SOL, NFTs and SPL tokens to earn rewards. The program handles configuration, staking and unstaking, and pays out rewards as a reward token when a position is unstaked.
 
-## NFT Freezing
-The project includes functionality to freeze NFTs during the staking process. When an NFT is staked, it is temporarily frozen to prevent any transfers or modifications until the user unstakes it. This ensures that the NFT remains secure while it is being staked.
+## NFT freezing
+When an NFT is staked, it stays in the user's wallet but is frozen, so it can't be transferred or modified until the user unstakes it.
 
-### Freezing and Unfreezing NFTs
-- **Freeze NFT**: The `freeze` function is called when an NFT is staked, locking it in place.
-- **Thaw NFT**: The `thaw` function can be called to unlock the NFT when it is unstaked.
+### Freezing and thawing NFTs
+- **Stake NFT**: the program delegates the NFT to itself and freezes it (`FreezeDelegatedAccount`).
+- **Unstake NFT**: the program thaws the NFT (`ThawDelegatedAccount`) and revokes the delegation.
 
-## SOL Transfer and Withdraw
-The project includes functionality to Transfer SOL during the staking process. When an SOL is staked, it is temporarily Transferred to Stake account PDA and is locked to prevent any transfers or modifications until the user unstakes it.
+## SOL staking
+When SOL is staked, it is transferred to a stake account PDA and locked there until the user unstakes it.
 
-### Transferring and Withdrawing SOl
-- **Stake SOl**: The `transfer` function is called when SOL is staked, Transferring it in Staking Account PDA.
-- **Unstake SOL**: The `close` function can be called to withdraw the SOL when it is unstaked.
+### Staking and unstaking SOL
+- **Stake SOL**: a System Program `transfer` moves the SOL into the stake account PDA.
+- **Unstake SOL**: the stake account is closed and the SOL is returned to the user.
 
-## SPL Token Transfer and Withdraw
-The project includes functionality to Transfer SPL Token during the staking process. When an SPL Token is staked, it is temporarily Transferred to ATA of Stake account PDA and is locked to prevent any transfers or modifications until the user unstakes it.
+## SPL token staking
+When SPL tokens are staked, they are transferred to an associated token account owned by the stake account PDA and locked there until the user unstakes them.
 
-### Transferring and Withdrawing SPL Token
-- **Stake SPL Token**: The `transfer_checked` function is called when SPL Token is staked, Transferring it in Staking Account PDA's ATA Account.
-- **Unstake SPL Token**: The `transfer_checked` function can be called to withdraw the SOL when it is unstaked.
+### Staking and unstaking SPL tokens
+- **Stake SPL tokens**: `transfer_checked` moves the tokens into the stake account PDA's token account.
+- **Unstake SPL tokens**: `transfer_checked` returns the tokens to the user and the token account is closed.
+
+## Rewards
+- Each asset type earns points at its own rate (`points_per_nft_stake`, `points_per_sol_stake`, `points_per_spl_stake`), set in the config.
+- **Flexible staking**: you can unstake at any time and earn the base rate for the time staked.
+- **Locked staking**: you choose a lock period up front and earn extra yield for it. The lock period must be at least `min_freeze_period` (the tests use 60 seconds).
+- Rewards are minted to the user as the reward token when they unstake.
 
 ## Installation
 
-**To install the necessary dependencies, run the following command:**
+To install the dependencies, run:
 
-  ```bash
-  yarn install
-  ```
-  or
-  ```bash
-  npm install
-  ```
+```bash
+yarn install
+```
+
+or
+
+```bash
+npm install
+```
 
 ## Usage
 
-**To build the project, use:**
-  ```bash
-  anchor build
-  ```
+Build the program:
 
-**To run tests, use:**
-  ```bash
-  anchor test
-  ```
+```bash
+anchor build
+```
 
-**To deploy the project, use the following command:**
-  ```bash
-  anchor deploy
-  ```
+Run the tests:
 
+```bash
+anchor test
+```
 
-## Calculations
+Deploy:
 
-**To earn extra yield Asset must be locked for certain peroode otherwise flexible staking where you can unstake at any periode of time earn constant benefits only**
-
-**Staking Periode must be greater that min_stake_periode of 60 sec**
+```bash
+anchor deploy
+```
